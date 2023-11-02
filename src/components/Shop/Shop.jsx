@@ -3,17 +3,38 @@ import { addToDb, deleteShoppingCart, getShoppingCart } from '../../utilities/fa
 import Cart from '../Cart/Cart';
 import Product from '../Product/Product';
 import './Shop.css';
-import { Link } from 'react-router-dom';
+import { Link, useLoaderData } from 'react-router-dom';
 
 const Shop = () => {
     const [products, setProducts] = useState([]);
     const [cart, setCart] = useState([])
 
+  const [currentPage,setCurrentPges]=useState(0)
+    const [iteamsPerPage,setIteamPerpage]=useState(10)
+    const {count}=useLoaderData() 
+    const iteamPerPage=10;
+    const numberOfPages=Math.ceil(count/iteamsPerPage);
+
+    /**1
+     * dy vabe kora jabe 1step 
+     * */
+    // const pages=[];
+    // for(let i=0;i<numberOfPages;i++){
+    //     pages.push(i)
+    // }
+
+    const pages=[...Array(numberOfPages).keys()]
+    console.log(pages)
+    /**
+     * 1.Done 1: get the total number of products
+     * 2.Done 2: number of iteams perpage
+     * Toop 3:get the currient page
+     */
     useEffect(() => {
-        fetch('http://localhost:5000/products')
+        fetch(`http://localhost:5000/products?pages=${currentPage}&size=${iteamPerPage}`)
             .then(res => res.json())
             .then(data => setProducts(data))
-    }, []);
+    }, [currentPage,iteamPerPage]);
 
     useEffect(() => {
         const storedCart = getShoppingCart();
@@ -61,6 +82,25 @@ const Shop = () => {
         deleteShoppingCart();
     }
 
+    const handeliteamPerPage=e=>{
+        console.log(e.target.value)
+        const val=parseInt(e.target.value)
+        setIteamPerpage(val)
+        setCurrentPges(0)
+    }
+
+    const handelprevious=()=>{
+        if(currentPage>0){
+            setCurrentPges(currentPage-1)
+        }
+    }
+
+    const handelNaext=()=>{
+        if(currentPage<pages.length -1){
+            setCurrentPges(currentPage + 1)
+        }
+    }
+
     return (
         <div className='shop-container'>
             <div className="products-container">
@@ -81,6 +121,25 @@ const Shop = () => {
                         <button className='btn-proceed'>Review Order</button>
                     </Link>
                 </Cart>
+            </div>
+            <div className='pagenation text-center '>
+                <p>currentPage: {currentPage}</p>
+                <button onClick={handelprevious}>previous</button>
+                {
+                    pages.map(page=><button
+                        className={currentPage === page? ' bg-yellow-500':undefined}
+                        onClick={()=>setCurrentPges(page)}
+                        key={page}>{page}</button>)
+                }
+                <button onClick={handelNaext}>Next</button>
+                <select value={iteamPerPage}  onChange={handeliteamPerPage} name="" id="">
+
+                    <option value="5">5</option>
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                    <option value="40">40</option>
+                    <option value="50">50</option>
+                </select>
             </div>
         </div>
     );

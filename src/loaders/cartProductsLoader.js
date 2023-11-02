@@ -1,12 +1,21 @@
+import { json } from "react-router-dom";
 import { getShoppingCart } from "../utilities/fakedb";
 
 const cartProductsLoader = async () => {
-    const loadedProducts = await fetch('http://localhost:5000/products');
+    const storedCart = getShoppingCart();
+    const storeCartIds=Object.keys(storedCart)
+    console.log(storeCartIds)
+    const loadedProducts = await fetch('http://localhost:5000/productsByIds',{
+        method:'POST',
+        headers:{
+            'Content-Type':'application/json'
+        },
+        body:JSON.stringify(storeCartIds)
+    });
     const products = await loadedProducts.json();
 
     // if cart data is in database, you have to use async await
-    const storedCart = getShoppingCart();
-
+   
     const savedCart = [];
 
     for (const id in storedCart) {
